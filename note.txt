@@ -1,0 +1,3 @@
+Event 3E Prep-Call： 0x8010976
+Proc_Prep main： 859DBBC
+StartAtMenu-> gProc_AtMenu
