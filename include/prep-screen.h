@@ -24,6 +24,28 @@ struct Proc_AtMenu {
 	/* 40 */ u32 unk_40;
 };
 
+struct Proc_PrepMainMenuCmd {
+	/* 00 */ PROC_HEADER;
+	/* 29 */ u8 pad_29[0x2C - 0x29];
+	/* 2C */ void (*effect)(struct Proc_AtMenu*);
+	/* 30 */ void* unk_func;
+	/* 34 */ u32 msg;
+	/* 38 */ u8 color;
+	/* 39 */ u8 index;
+	/* 3A */ u8 pad_3A[0x3C - 0x3A];
+	/* 3C */ struct TextHandle text;
+};
+
+
+struct Proc_PrepMainMenu {
+	
+	/* 00 */ PROC_HEADER;
+	/* 29 */ u8 pad_29[0x2B - 0x29];
+	/* 2B */ u8 cur_index;
+	/* 2C */ u8 unk_2C[0x38 - 0x2C];
+	/* 38 */ struct Proc_PrepMainMenuCmd* cmds[0x7];
+	/* 54 */
+};
 
 
 struct PrepScreenUnitList {
@@ -33,9 +55,11 @@ struct PrepScreenUnitList {
 };
 
 extern struct PrepScreenUnitList gPrepScreenUnitList; // 0x20121CC
-
+extern struct ProcCmd gProc_PrepScreenMenu[]; // 8A186EC
+extern struct ProcCmd gProc_PrepScreenMenuDummyItem[]; // 8A186DC
 
 #define gPrepTexts gUnknown_0201117C
 extern struct TextHandle gPrepTexts[]; // 0201117C
 
 void SetPrepScreenUnitListCharID(u32 index); // 80953C0
+void SetPrepScreenMenuItem(int index, void(*effect)(struct Proc_AtMenu*), int color, int msg, void* maybe_func); // 8097024

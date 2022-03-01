@@ -77,6 +77,8 @@ void _AtMenu_Reinitialize(struct Proc_AtMenu* proc) {
 	extern u16 gUnknown_08A1B658[]; // tsa
 	extern u16 gUnknown_08A1B698[]; // tsa
 	
+	
+	
 	SetupBackgrounds(gUnknown_08A181E8);
 	Font_InitForUIDefault();
 	LoadUiFrameGraphics();
@@ -183,6 +185,104 @@ void _AtMenu_Reinitialize(struct Proc_AtMenu* proc) {
 	DrawPrepScreenMenuHelpText( GetActivePrepScreenMenuItemHelpTextId() );
 	DisplayPrepScreenMenuHelpText();
 }
+
+
+
+
+// 8095524
+void AtMenu_InitPrepScreenMenu(struct Proc_AtMenu* proc) {
+	
+	void PrepScreenMenu_OnPickUnits(struct Proc_AtMenu*);
+	void PrepScreenMenu_OnItems(struct Proc_AtMenu*);
+	void PrepScreenMenu_OnCheckMap(struct Proc_AtMenu*);
+	void PrepScreenMenu_OnSave(struct Proc_AtMenu*);
+	void PrepScreenMenu_OnBPress(struct Proc_AtMenu*);
+	void PrepScreenMenu_OnStartPress(struct Proc_AtMenu*);
+	
+	// <!>
+	StartPrepScreenMenu();
+	
+	// here neglect Arena case
+	SetPrepScreenMenuItem(0, PrepScreenMenu_OnPickUnits, TEXT_COLOR_NORMAL, 0x574, NULL);
+	SetPrepScreenMenuItem(1, PrepScreenMenu_OnItems, TEXT_COLOR_NORMAL, 0x576, NULL);
+	AtMenu_AddPrepScreenSupportMenuItem(proc);
+	
+	SetPrepScreenMenuItem(
+		7, PrepScreenMenu_OnCheckMap,
+		0 == CanPrepScreenCheckMap()
+			? TEXT_COLOR_GRAY
+			: TEXT_COLOR_NORMAL,
+		0x578, // Check Map[.][X]
+		NULL
+	);
+	
+	SetPrepScreenMenuItem(
+		2, PrepScreenMenu_OnSave,
+		0 == CanPrepScreenSave()
+			? TEXT_COLOR_GRAY
+			: TEXT_COLOR_NORMAL,
+		0x579, // Save[X]
+		NULL 
+	);
+	
+	SetPrepScreenMenuOnBPress(PrepScreenMenu_OnBPress);
+	SetPrepScreenMenuOnStartPress(PrepScreenMenu_OnStartPress);
+	
+	TileMap_FillRect(gBG0TilemapBuffer, 0xC, 0x13, 0);
+	TileMap_FillRect(gBG1TilemapBuffer, 0xC, 0x13, 0);
+	
+	SetPrepScreenMenuPosition(1, 6);
+	SetPrepScreenMenuSelectedItem(proc->unk_2D);
+}
+
+
+
+// 8097024
+void SetPrepScreenMenuItem(int index, void(*effect)(struct Proc_AtMenu*), int color, int msg, void* maybe_func) {
+	
+	struct Proc_PrepMainMenu *menu;
+	struct Proc_PrepMainMenuCmd *cmd;
+	
+	menu = (struct Proc_PrepMainMenu*) Proc_Find(gProc_PrepScreenMenu);
+	
+	if( NULL == menu )
+		return;
+	
+	cmd = menu->cmds[0];
+	
+	for ( int i = 0; i < 7; i++){
+		
+		cmd = menu->cmds[i];
+		
+		if ( NULL == cmd )
+			continue;
+		
+		if ( index == cmd->index )
+		{
+			cmd->effect = effect;
+			cmd->color = color;
+			cmd->msg = msg;
+			cmd->unk_func = maybe_func;
+			return;
+		}
+
+	}
+	
+	cmd = (struct Proc_PrepMainMenuCmd*) Proc_Start(gProc_PrepScreenMenuDummyItem, menu);
+	
+	menu->cmds[menu->cur_index] = cmd;
+	cmd->index = index;
+	cmd->effect = effect;
+	cmd->color = color;
+	cmd->msg = msg;
+	cmd->unk_func = maybe_func;
+	
+	Text_Init(&cmd->text, 7);
+	menu->cur_index++;
+	
+	
+}
+
 
 
 

@@ -254,7 +254,7 @@ void PrepScreenItemUseScreen_InitDisplay (struct Proc_PrepItemUse* proc) {
 	Text_Init( &TH_PREP_ITEM[26], 15);
 	Text_Init( &TH_PREP_ITEM[27], 14);
 	Text_Init( &TH_PREP_ITEM[28], 8);
-	Text_Init( &TH_PREP_ITEM[29], 15);
+	Text_Init( &TH_PREP_ITEM[30], 15);
 	
 	DrawPrepScreenItemUseStatLabels(proc->unit);
 	DrawPrepScreenItemUseStatValues(proc->unit);
