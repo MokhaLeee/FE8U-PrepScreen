@@ -1,3 +1,15 @@
 Event 3E Prep-Call： 0x8010976
 Proc_Prep main： 859DBBC
 StartAtMenu-> gProc_AtMenu
+
+
+
+<1>
+上层的 Proc_AtMenu(8A1829C) 开启子线程 Proc_PrepMainMenu(8A186EC)之后很明显是被阻塞的，但是调用的过程并非调用函数"Proc_StartBlocking",而是用了一个奇怪的方式：
+
+PROC_CALL	(AtMenu_Reinitialize),
+// ...
+PROC_CALL	(EnablePrepScreenMenu),
+PROC_REPEAT	(AtMenu_MaintainPrepScreenMenuHelp),
+
+通过这种方式实现事实上的阻塞的原因在于 Proc_PrepMainMenu 内部的主循环内，判定KeyPress的时候不同的生效函数是直接对应于 void (*effect)(ProcPtr parent)的，并且不同按键对应的效果函数都会调用函数Proc_Goto(parent, LABEL)，从而实现对AtMenu线程的条件跳转，从而直接跳出 PROC_REPEAT(AtMenu_MaintainPrepScreenMenuHelp)。
