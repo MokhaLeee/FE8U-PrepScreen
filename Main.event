@@ -1,4 +1,7 @@
 
+// #define _HACK_
+#define _DECOMP_
+
 #include "EAstdlib.event"
 #include "Extensions/Hack Installation.txt"
 
@@ -22,7 +25,13 @@
 // ====== Prep-screen AtMenu =======
 // =================================
 
-#include "prep-AtMenu/PrepScreen-AtMenu.lyn.event"
+#ifdef _DECOMP_
+
+#include "PrepScreen/SallyCursor.lyn.event"
+#include "PrepScreen/AtMenu.lyn.event"
+#include "PrepScreen/PrepScreenMenu.lyn.event"
+#include "PrepScreen/PrepUnitList.lyn.event"
+
 
 PUSH
 	ORG $095AD8
@@ -30,10 +39,26 @@ PUSH
 	
 	ORG $0953C0
 	LynJump(SetPrepScreenUnitListCharID)
+	
+	ORG $096294
+	LynJump(AtMenu_OnEnd_8096294)
+	
+	ORG $0962E0
+	LynJump(AtMenu_OnEnd_80962E0)
+	
+	ORG $09643C
+	LynJump(AtMenu_OnEnd_809643C)
 
 POP
+#endif // _DECOMP_
 
 
+
+#ifdef _HACK_
+
+#include "PrepRework/PrepRework.event"
+
+#endif
 
 
 
@@ -44,7 +69,7 @@ POP
 // =================================
 
 
-#include "prep-ItemUse/PrepScreen-ItemUse.lyn.event"
+#include "PrepScreen/Prep-ItemUseSubScreen.lyn.event"
 
 
 PUSH

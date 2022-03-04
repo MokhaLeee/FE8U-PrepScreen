@@ -1,12 +1,27 @@
 #pragma once
 
+// ====================================================
+
+// C-Lib version: FE-CLib-Mokha
+// https://github.com/MokhaLeee/FE-CLib-Mokha.git
+
 #include "gbafe.h"
+// ====================================================
+
+struct Proc_SALLYCURSOR {
+	
+	/* 00 */ PROC_HEADER;
+	/* 29 */ u8 pad_29[0x58 - 0x29];
+	/* 58 */ u32 unk_58;
+	/* 5C */
+};
+
 
 struct Proc_AtMenu {
 	/* 00 */ PROC_HEADER;
 	/* 29 */ u8 unit_count;
-	/* 2A */ u8 max_count;
-	/* 2B */ u8 cur_count;
+	/* 2A */ u8 select_count_max;
+	/* 2B */ u8 select_count;
 	/* 2C */ u8 unk_2C;
 	/* 2D */ u8 unk_2D;
 	/* 2E */ u8 unk_2E;
@@ -17,12 +32,32 @@ struct Proc_AtMenu {
 	/* 33 */ u8 state;
 	/* 34 */ u8 unk_34;
 	/* 35 */ u8 unk_35;
-	/* 36 */ u8 unk_36;
+	/* 36 */ u8 end_prep;
 	/* 38 */ u8 unk_38[0x3C - 0x38];
 	/* 3C */ u16 unk_3C;
 	/* 3E */ u16 unk_3E; 
 	/* 40 */ u32 unk_40;
 };
+
+
+struct Proc_PrepMainMenuCmd;
+
+struct Proc_PrepMainMenu {
+	
+	/* 00 */ PROC_HEADER;
+	/* 29 */ s8 rtext_on;
+	/* 2A */ u8 cur_index;
+	/* 2B */ u8 max_index;
+	/* 2C */ u8 unk_2C[0x33 - 0x2C];
+	/* 33 */ u8 end_state;
+	/* 34 */ s16 xPos;
+	/* 36 */ s16 yPos;
+	/* 38 */ struct Proc_PrepMainMenuCmd* cmds[0x8];
+	/* 58 */ int (*on_bPress)(ProcPtr);
+	/* 5C */ int (*on_startPress)(ProcPtr);
+	/* 60 */ void (*on_end)(ProcPtr parent);
+};
+
 
 struct Proc_PrepMainMenuCmd {
 	/* 00 */ PROC_HEADER;
@@ -36,37 +71,67 @@ struct Proc_PrepMainMenuCmd {
 	/* 3C */ struct TextHandle text;
 };
 
-
-struct Proc_PrepMainMenu {
-	
-	/* 00 */ PROC_HEADER;
-	/* 29 */ s8 rtext_on;
-	/* 2A */ u8 cur_index;
-	/* 2B */ u8 max_index;
-	/* 2C */ u8 unk_2C[0x33 - 0x2C];
-	/* 33 */ u8 end_state;
-	/* 34 */ s16 xPos;
-	/* 36 */ s16 yPos;
-	/* 38 */ struct Proc_PrepMainMenuCmd* cmds[0x8];
-	/* 58 */ int (*b_press)(ProcPtr);
-	/* 5C */ int (*start_press)(ProcPtr);
-	/* 60 */ void (*on_end)(ProcPtr parent);
-};
-
-
 struct PrepScreenUnitList {
 	struct Unit* units[0x40];
 	s32 size;
 	u32 char_id;
 };
 
-extern struct PrepScreenUnitList gPrepScreenUnitList; // 0x20121CC
-extern const struct ProcCmd gProc_PrepScreenMenu[]; // 8A186EC
-extern const struct ProcCmd gProc_PrepScreenMenuDummyItem[]; // 8A186DC
-extern const struct ProcCmd gProc_PrepScreenMenu[]; // 8A186EC
 
+
+
+// Text
 #define gPrepTexts gUnknown_0201117C
 extern struct TextHandle gPrepTexts[]; // 0201117C
 
-void SetPrepScreenUnitListCharID(u32 index); // 80953C0
+
+// Prep Unit stack
+void InitUnitStack(void* dest);
+void PushUnit(struct Unit*);
+void LoadPlayerUnitsFromUnitStack();
+
+// Prep Unit List
+extern struct PrepScreenUnitList gPrepScreenUnitList; // 0x20121CC
+int GetChapterAllyUnitCount();
+void SetPrepScreenUnitListCharID(int index); // 80953C0
+struct Unit* GetPrepScreenUnitListEntry(int num);
+void ReorderPlayerUnitsBasedOnDeployment();
+
+// AtMenu
+void StartPrepScreenItemsMenu(struct Proc_AtMenu* proc);
+void StartPrepScreenSupportMenu(int, struct Proc_AtMenu* proc);
+void StartPrepScreenSaveMenu(struct Proc_AtMenu* proc);
+
+
+// Unit menu
+extern struct ProcCmd gProc_PrepScreenPickUnitsMenu[];
+
+
+// prep menu
+extern const struct ProcCmd gProc_PrepScreenMenu[]; // 8A186EC
+extern const struct ProcCmd gProc_PrepScreenMenuDummyItem[]; // 8A186DC
+void StartPrepScreenMenu(ProcPtr);
 void SetPrepScreenMenuItem(int index, void* effect_routine, int color, int msg, int msg_rtext); // 8097024
+
+
+// Prep-main-menu effect routine
+void PrepScreenMenu_OnPickUnits(struct Proc_AtMenu*);
+void PrepScreenMenu_OnItems(struct Proc_AtMenu*);
+void PrepScreenMenu_OnCheckMap(struct Proc_AtMenu*);
+void PrepScreenMenu_OnSave(struct Proc_AtMenu*);
+int PrepScreenMenu_OnBPress(struct Proc_AtMenu*);
+int PrepScreenMenu_OnStartPress(struct Proc_AtMenu*);
+
+void PrepScreenMapMenu_OnViewMap(struct Proc_SALLYCURSOR*);
+void PrepScreenMapMenu_OnFormation(struct Proc_SALLYCURSOR*);
+void PrepScreenMapMenu_OnOptions(struct Proc_SALLYCURSOR*);
+void PrepScreenMapMenu_OnSave(struct Proc_SALLYCURSOR*);
+int PrepScreenMapMenu_OnBPress(struct Proc_SALLYCURSOR*);
+int PrepScreenMapMenu_OnStartPress(struct Proc_SALLYCURSOR*);
+void PrepScreenMapMenu_OnEnd(struct Proc_SALLYCURSOR*);
+
+
+
+// others
+void EndPrepScreen();
+
