@@ -1,5 +1,5 @@
 
-// #define _HACK_
+
 #define _DECOMP_
 
 #include "EAstdlib.event"
@@ -31,7 +31,7 @@
 #include "PrepScreen/AtMenu.lyn.event"
 #include "PrepScreen/PrepScreenMenu.lyn.event"
 #include "PrepScreen/PrepUnitList.lyn.event"
-
+#include "PrepScreen/Prep-UnitScreen.lyn.event"
 
 PUSH
 	ORG $095AD8
@@ -49,16 +49,26 @@ PUSH
 	ORG $09643C
 	LynJump(AtMenu_OnEnd_809643C)
 
+	
+	// Prep Unit Screen
+	ORG $09B40C
+	LynJump(ProcPrepUnit_OnEnd)
+	
+	ORG $09AE3C
+	LynJump(ProcPrepUnit_OnInit)
+	
+	ORG $09AE7C
+	LynJump(ProcPrepUnit_InitScreen)
+	
+	ORG $09B038
+	LynJump(ProcPrepUnit_Idle)
+	
 POP
 #endif // _DECOMP_
 
 
 
-#ifdef _HACK_
 
-#include "PrepRework/PrepRework.event"
-
-#endif
 
 
 

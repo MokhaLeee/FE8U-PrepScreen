@@ -22,7 +22,7 @@ extern void SetPrepScreenMenuPosition(int, int);
 extern void SetPrepScreenMenuSelectedItem(int);
 extern void sub_8096BE0();
 extern void sub_8096BC4();
-extern void EndBG3Slider_(ProcPtr);
+extern void EndBG3Slider_();
 extern void sub_8096C20();
 extern void SetColorEffectsFirstTarget(int, int, int, int, int);
 extern void SetColorEffectBackdropFirstTarget(int);
@@ -58,12 +58,12 @@ void AtMenu_OnInit(struct Proc_AtMenu* proc){
 	SetPrepScreenUnitListCharID(0);
 	
 	proc->unk_40 = 0;
-	proc->unk_3C = 0;
+	proc->yDiff = 0;
 	
 	if ( 0 == CheckSomethingSomewhere())
-		proc->select_count_max = GetChapterAllyUnitCount();
+		proc->max_counter = GetChapterAllyUnitCount();
 	else
-		proc->select_count_max = 5;
+		proc->max_counter = 5;
 	
 	proc->unk_30 = 0;
 	proc->unk_31 = 0;
@@ -265,7 +265,7 @@ void AtMenu_InitPrepScreenMenu(struct Proc_AtMenu* proc) {
 
 void AtMenu_AutoCapDeployPrepScreenUnits(struct Proc_AtMenu* proc){
 	
-	proc->select_count = 0;
+	proc->cur_counter = 0;
 	proc->unit_count = 0;
 	
 	for( int i = 0; i < GetChapterAllyUnitCount(); i++){
@@ -277,19 +277,19 @@ void AtMenu_AutoCapDeployPrepScreenUnits(struct Proc_AtMenu* proc){
 			continue;
 		}
 		
-		if( proc->select_count_max < proc->select_count ){
+		if( proc->max_counter < proc->cur_counter ){
 			unit->state = US_NOT_DEPLOYED;
 			proc->unit_count++;
 			continue;
 		}
 		
-		proc->select_count++;
+		proc->cur_counter++;
 		proc->unit_count++;
 		
 	} // for
 	
-	if( proc->select_count_max < proc->select_count )
-		proc->select_count_max = proc->select_count;
+	if( proc->max_counter < proc->cur_counter )
+		proc->max_counter = proc->cur_counter;
 		
 }
 
@@ -305,7 +305,7 @@ void AtMenu_AutoCapDeployPrepScreenUnits(struct Proc_AtMenu* proc){
 
 void AtMenu_OnEnd_8096294(struct Proc_AtMenu* proc){
 	
-	EndBG3Slider_(proc);
+	EndBG3Slider_();
 	sub_8096C20();
 	SetupBackgrounds(0);
 	SetSpecialColorEffectsParameters(3,0,0,0x10);
@@ -463,7 +463,7 @@ int PrepScreenMenu_OnBPress(struct Proc_AtMenu* proc){
 
 int PrepScreenMenu_OnStartPress(struct Proc_AtMenu* proc){
 	
-	if( 0 == proc->select_count )
+	if( 0 == proc->cur_counter )
 		return 0;
 	
 	sub_8096BC4();

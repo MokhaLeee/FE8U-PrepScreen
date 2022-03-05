@@ -29,6 +29,15 @@ UNIT Ephraim Dancer Eirika Level(1,Ally,False) [5,4] 0x0 0x0 0x0 0x1 [SilverBow,
 UNIT Natasha Dancer Eirika Level(1,Ally,False) [6,4] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
 UNIT Amelia Dancer Eirika Level(1,Ally,False) [5,3] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
 UNIT Artur Dancer Eirika Level(1,Ally,False) [6,3] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
+
+UNIT 6 Dancer Eirika Level(1,Ally,False) [0,0] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
+UNIT 7 Dancer Eirika Level(1,Ally,False) [1,0] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
+UNIT 8 Dancer Eirika Level(1,Ally,False) [2,0] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
+UNIT 9 Dancer Eirika Level(1,Ally,False) [3,0] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
+UNIT $A Dancer Eirika Level(1,Ally,False) [4,0] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
+UNIT $B Dancer Eirika Level(1,Ally,False) [5,0] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
+UNIT $C Dancer Eirika Level(1,Ally,False) [6,0] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
+UNIT $D Dancer Eirika Level(1,Ally,False) [7,0] 0x0 0x0 0x0 0x1 [SilverBow,SteelSword] NoAI
 UNIT
 
 EnemyUnits:

@@ -20,8 +20,8 @@ struct Proc_SALLYCURSOR {
 struct Proc_AtMenu {
 	/* 00 */ PROC_HEADER;
 	/* 29 */ u8 unit_count;
-	/* 2A */ u8 select_count_max;
-	/* 2B */ u8 select_count;
+	/* 2A */ u8 max_counter; // Total unit number can be on battle
+	/* 2B */ u8 cur_counter; // Total unit number to be on battle
 	/* 2C */ u8 unk_2C;
 	/* 2D */ u8 unk_2D;
 	/* 2E */ u8 unk_2E;
@@ -34,7 +34,7 @@ struct Proc_AtMenu {
 	/* 35 */ u8 unk_35;
 	/* 36 */ u8 end_prep;
 	/* 38 */ u8 unk_38[0x3C - 0x38];
-	/* 3C */ u16 unk_3C;
+	/* 3C */ u16 yDiff; // y Pos offset of Unit SMS
 	/* 3E */ u16 unk_3E; 
 	/* 40 */ u32 unk_40;
 };
@@ -71,6 +71,24 @@ struct Proc_PrepMainMenuCmd {
 	/* 3C */ struct TextHandle text;
 };
 
+
+struct Proc_PrepUnit {
+	/* 00 */ PROC_HEADER;
+	/* 29 */ u8 cur_counter; // Total unit number to be on battle
+	/* 2A */ u8 max_counter; // Total unit number can be on battle
+	/* 2B */ u8 unk_2B;
+	/* 2C */ u16 list_num_pre; // pre unit index in prep-list(for scroll)
+	/* 2E */ u16 list_num_cur; // current unit index in prep-list
+	/* 30 */ u16 yDiff_cur; // y Pos offset of Unit SMS (current)
+	/* 32 */ u16 unk_32;
+	/* 34 */ u8 pad_34[0x36 - 0x34];
+	/* 36 */ u8 scroll_val; // each px to scroll at each frame
+	/* 37 */ u8 unk_37;
+	/* 38 */ u8 pad_38[0x3C - 0x38];
+	/* 3C */ u16 unk_3C;
+};
+
+
 struct PrepScreenUnitList {
 	struct Unit* units[0x40];
 	s32 size;
@@ -96,6 +114,7 @@ int GetChapterAllyUnitCount();
 void SetPrepScreenUnitListCharID(int index); // 80953C0
 struct Unit* GetPrepScreenUnitListEntry(int num);
 void ReorderPlayerUnitsBasedOnDeployment();
+extern int GetPrepScreenUnitListSize();
 
 // AtMenu
 void StartPrepScreenItemsMenu(struct Proc_AtMenu* proc);
