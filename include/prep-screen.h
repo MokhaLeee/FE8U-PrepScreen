@@ -12,10 +12,20 @@ struct Proc_SALLYCURSOR {
 	
 	/* 00 */ PROC_HEADER;
 	/* 29 */ u8 pad_29[0x58 - 0x29];
-	/* 58 */ u32 unk_58;
+	/* 58 */ u32 status;
 	/* 5C */
 };
 
+
+enum{
+	
+	// status of proc: Sally-Cursor (proc_prep + 0x58)
+	
+	STAT_PREPMAIN_NORMAL = 1,
+	STAT_PREPMAIN_VIEWMAP = 2,
+	
+	
+};
 
 struct Proc_AtMenu {
 	/* 00 */ PROC_HEADER;
@@ -115,6 +125,10 @@ void SetPrepScreenUnitListCharID(int index); // 80953C0
 struct Unit* GetPrepScreenUnitListEntry(int num);
 void ReorderPlayerUnitsBasedOnDeployment();
 extern int GetPrepScreenUnitListSize();
+extern void ShrinkPlayerUnitList();
+
+// SallyCursor
+extern const struct ProcCmd gProc_PrepScreen[];
 
 // AtMenu
 void StartPrepScreenItemsMenu(struct Proc_AtMenu* proc);
@@ -129,7 +143,10 @@ extern struct ProcCmd gProc_PrepScreenPickUnitsMenu[];
 // prep menu
 extern const struct ProcCmd gProc_PrepScreenMenu[]; // 8A186EC
 extern const struct ProcCmd gProc_PrepScreenMenuDummyItem[]; // 8A186DC
+
 void StartPrepScreenMenu(ProcPtr);
+extern void ClosePrepScreenMapMenu(void);
+void EndPrepScreenMenu(void);
 void SetPrepScreenMenuItem(int index, void* effect_routine, int color, int msg, int msg_rtext); // 8097024
 
 
@@ -153,4 +170,10 @@ void PrepScreenMapMenu_OnEnd(struct Proc_SALLYCURSOR*);
 
 // others
 void EndPrepScreen();
+
+
+
+
+
+
 

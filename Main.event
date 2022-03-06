@@ -1,6 +1,7 @@
 
 
-#define _DECOMP_
+// #define _DECOMP_
+#define HACK
 
 #include "EAstdlib.event"
 #include "Extensions/Hack Installation.txt"
@@ -18,6 +19,13 @@
 #endif // LynJumpDefined
 
 
+
+
+#ifdef HACK
+
+#include "PrepScreen-Rework/PrepScreen-Rework.event"
+
+#endif // HACK
 
 
 
@@ -62,6 +70,9 @@ PUSH
 	
 	ORG $09B038
 	LynJump(ProcPrepUnit_Idle)
+	
+	ORG $09B438
+	LynJump(ProcPrepUnit_OnGameStart)
 	
 POP
 #endif // _DECOMP_

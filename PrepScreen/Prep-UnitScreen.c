@@ -32,15 +32,15 @@ static void (*PrepUnit_DrawText_Pick_Left)(struct Proc_PrepUnit*,int) = (const v
 void ProcPrepUnit_OnEnd(struct Proc_PrepUnit* proc){
 	
 	struct Proc_AtMenu* parent;
-	struct Unit* unit;
 	
 	parent = (struct Proc_AtMenu*)proc->proc_parent;
 	
 	parent->yDiff = proc->yDiff_cur;
 	parent->cur_counter = proc->cur_counter;
 	
-	unit = GetPrepScreenUnitListEntry(proc->list_num_cur);
-	SetPrepScreenUnitListCharID(unit->pCharacterData->number);
+	SetPrepScreenUnitListCharID(
+		GetPrepScreenUnitListEntry(proc->list_num_cur)->pCharacterData->number);
+	
 	EndBG3Slider_();
 }
 
@@ -212,6 +212,7 @@ void ProcPrepUnit_Idle(struct Proc_PrepUnit* proc){
 	} // B_BUTTON
 
 
+	// DPAD
 	if( DPAD_LEFT & key_pre )
 		if( 1 & proc->list_num_cur )
 			proc->list_num_cur--;
@@ -290,4 +291,18 @@ goto_MenuScroll:
 }
 
 
+// Label 63
+// 809B438
+void ProcPrepUnit_OnGameStart(struct Proc_PrepUnit* proc){
+	
+	struct Proc_AtMenu* parent;
+	
+	parent = proc->proc_parent;
+	parent->end_prep = 1;
+	
+	// Here goto AtMenu's label !!
+	Proc_Goto(parent, 0x6); // AtMenu label 6: end
+	
+	proc->unk_37 = 1;
+}
 

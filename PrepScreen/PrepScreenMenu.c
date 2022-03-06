@@ -36,60 +36,6 @@ PROC_LABEL(0xA),
 };
 
 
-void StartPrepScreenMenu(ProcPtr proc){
-	
-	Proc_End( Proc_Find(gProc_PrepScreenMenu) );
-	Proc_Start(gProc_PrepScreenMenu, proc);
-}
-
-
-
-// 8097024
-void SetPrepScreenMenuItem(int index, void *effect, int color, int msg, int msg_rtext) {
-	
-	struct Proc_PrepMainMenu *menu;
-	struct Proc_PrepMainMenuCmd *cmd;
-	
-	menu = (struct Proc_PrepMainMenu*) Proc_Find(gProc_PrepScreenMenu);
-	
-	if( NULL == menu )
-		return;
-	
-	cmd = menu->cmds[0];
-	
-	for ( int i = 0; i < 8; i++){
-		
-		cmd = menu->cmds[i];
-		
-		if ( NULL == cmd )
-			continue;
-		
-		if ( index == cmd->index )
-		{
-			cmd->effect = effect;
-			cmd->color = color;
-			cmd->msg = msg;
-			cmd->msg_rtext = msg_rtext;
-			return;
-		}
-
-	}
-	
-	cmd = (struct Proc_PrepMainMenuCmd*) Proc_Start(gProc_PrepScreenMenuDummyItem, menu);
-	
-	menu->cmds[menu->max_index] = cmd;
-	cmd->index = index;
-	cmd->effect = effect;
-	cmd->color = color;
-	cmd->msg = msg;
-	cmd->msg_rtext = msg_rtext;
-	
-	Text_Init(&cmd->text, 7);
-	menu->max_index++;
-	
-	
-}
-
 
 
 
@@ -281,3 +227,105 @@ goto_on_failure:
 		m4aSongNumStart(0x6C);
 	return;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Misc
+
+
+void StartPrepScreenMenu(ProcPtr proc){
+	
+	Proc_End( Proc_Find(gProc_PrepScreenMenu) );
+	Proc_Start(gProc_PrepScreenMenu, proc);
+}
+
+
+
+
+// 8097024
+void SetPrepScreenMenuItem(int index, void *effect, int color, int msg, int msg_rtext) {
+	
+	struct Proc_PrepMainMenu *menu;
+	struct Proc_PrepMainMenuCmd *cmd;
+	
+	menu = (struct Proc_PrepMainMenu*) Proc_Find(gProc_PrepScreenMenu);
+	
+	if( NULL == menu )
+		return;
+	
+	cmd = menu->cmds[0];
+	
+	for ( int i = 0; i < 8; i++){
+		
+		cmd = menu->cmds[i];
+		
+		if ( NULL == cmd )
+			continue;
+		
+		if ( index == cmd->index )
+		{
+			cmd->effect = effect;
+			cmd->color = color;
+			cmd->msg = msg;
+			cmd->msg_rtext = msg_rtext;
+			return;
+		}
+
+	}
+	
+	cmd = (struct Proc_PrepMainMenuCmd*) Proc_Start(gProc_PrepScreenMenuDummyItem, menu);
+	
+	menu->cmds[menu->max_index] = cmd;
+	cmd->index = index;
+	cmd->effect = effect;
+	cmd->color = color;
+	cmd->msg = msg;
+	cmd->msg_rtext = msg_rtext;
+	
+	Text_Init(&cmd->text, 7);
+	menu->max_index++;
+	
+	
+}
+
+
+
+
+
+void EndPrepScreenMenu(void){
+	
+	struct Proc_PrepMainMenu* proc;
+	
+	proc = Proc_Find(gProc_PrepScreenMenu);
+	
+	if( NULL == proc )
+		return;
+	
+	TileMap_FillRect(
+		TILEMAP_LOCATED(gBG0TilemapBuffer, proc->xPos, proc->yPos),
+		9, proc->max_index * 2 + 2, 0 );
+	
+	TileMap_FillRect(
+		TILEMAP_LOCATED(gBG1TilemapBuffer, proc->xPos, proc->yPos),
+		9, proc->max_index * 2 + 2, 0 );
+	
+	BG_EnableSyncByMask(0b11);
+	
+	Proc_Goto(proc, 0xA); // goto label-end
+	
+}
+
+
+

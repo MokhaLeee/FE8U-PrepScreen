@@ -1,6 +1,5 @@
-#include "prep-item.h"
-
-
+// #include "prep-item.h"
+#include "gbafe.h"
 
 #define TH_PREP_ITEM gUnknown_02013498
 extern struct TextHandle gUnknown_02013498[];
@@ -69,7 +68,7 @@ static u16 (*ApplyJunaFruitAndGetMessageId)(struct Unit*, int item_slot) = (cons
 
 
 
-enum{
+/* enum{
 	PROC_LABEL_PREPITEM_INIT = 0,
 	PROC_LABEL_PREPITEM_IDLE = 1,
 	PROC_LABEL_PREPITEM_CONFIRM = 2,
@@ -79,7 +78,7 @@ enum{
 	PROC_LABEL_PREPITEM_PRE_END = 6,
 	PROC_LABEL_PREPITEM_END = 7,
 };
-
+ */
 
 
 // 8A19064
@@ -186,7 +185,7 @@ void PrepScreenItemUseScreen_InitDisplay (struct Proc_PrepItemUse* proc) {
 	void NewFace2(int, int, int, int, int);
 	static void (*PrepScreenItemUseScreen_Init_DrawSomeGfx1)(int, int) = (const void*) 0x8098C3D;
 	static void (*PrepScreenItemUseScreen_Init_DrawSomeGfx2)(int, int) = (const void*) 0x8098C8D;
-	extern u8 gGenericBuffer[0x200];
+	// extern u8 gGenericBuffer[0x200];
 	int StartSmallBrownNameBoxes(int, int, int, int, int, ProcPtr);
 	static void (*MaybeConfigSmallBrownNameBox)(int, int, int, int) = (const void*) 0x80ADBFD;
 	extern const struct ProcCmd gProc_8A20B4C[];

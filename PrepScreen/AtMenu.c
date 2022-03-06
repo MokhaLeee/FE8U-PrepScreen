@@ -28,7 +28,6 @@ extern void SetColorEffectsFirstTarget(int, int, int, int, int);
 extern void SetColorEffectBackdropFirstTarget(int);
 extern void PositionUnitsAccordingToDeployment();
 
-extern u16 gGenericBuffer[]; // 2020188
 extern u16 gBgConfig_8A181E8[];
 extern struct TextHandle gPrepScreenMenuHelpTextArray[];
 
@@ -322,6 +321,7 @@ void AtMenu_OnEnd_80962E0(struct Proc_AtMenu* proc){
 	
 	if( 1 == proc->end_prep )
 		EndPrepScreen();
+	
 	else if( 0 != CheckSomethingSomewhere() )
 		sub_8042EA8(); // maybe arena
 	
@@ -345,6 +345,8 @@ void AtMenu_OnEnd_809643C(struct Proc_AtMenu* proc){
 // =======================================================
 // ================ Sub menu routine =====================
 // =======================================================
+
+// Label 2
 
 void AtMenu_StartSubmenu(struct Proc_AtMenu* proc){
 	

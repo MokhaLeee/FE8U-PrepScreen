@@ -1,6 +1,8 @@
 
 #include "prep-screen.h"
 
+extern struct Struct0202BCB0 gGameState;
+
 extern void DeletePlayerPhaseInterface6Cs();
 extern int sub_8095970();
 extern int CanPrepScreenSave();
@@ -10,8 +12,35 @@ extern void SetPrepScreenMenuOnStartPress(void*);
 extern void SetPrepScreenMenuOnEnd(void*);
 extern void DrawPrepScreenMenuFrameAt(int, int);
 extern void SetPrepScreenMenuSelectedItem(int);
+static int (*InitChapterDeployedUnitAndGetCount)(void) = (const void*) 0x8095971;
 
 void PrepScreenProc_StartMapMenu(struct Proc_SALLYCURSOR*);
+
+
+
+void InitPrepScreenCursorPosition(struct Proc_SALLYCURSOR* proc_prep){
+	
+	struct Unit* unit;
+	u8 x, y;
+	
+	unit = GetUnitFromCharId( GetPlayerLeaderUnitId() );
+	
+	if( (NULL != unit) && (InitChapterDeployedUnitAndGetCount() != 0) )
+		SetCursorMapPosition(unit->xPos, unit->yPos);
+	
+	else
+	{
+		GetPreferredPositionForUNIT(
+			CountForceDeployedUnits() + GetChapterAllyUnitDataPointer(),
+			&x, &y, 0);
+		
+		SetCursorMapPosition(x,y);
+	}
+	
+	gGameState.camera.x = sub_8015A40(gGameState.playerCursor.x * 16);
+	gGameState.camera.y = sub_8015A6C(gGameState.playerCursor.y * 16);
+}
+
 
 
 // =======================================================
@@ -20,7 +49,7 @@ void PrepScreenProc_StartMapMenu(struct Proc_SALLYCURSOR*);
 
 void PrepScreenProc_InitMapMenu(struct Proc_SALLYCURSOR* proc){
 	
-	proc->unk_58 = 1;
+	proc->status = 1;
 	PrepScreenProc_StartMapMenu(proc);
 }
 
@@ -82,6 +111,61 @@ void PrepScreenProc_StartMapMenu(struct Proc_SALLYCURSOR* proc_prep){
 	// <!>
 	DrawPrepScreenMenuFrameAt(0xA, 0x2);
 	
-	SetPrepScreenMenuSelectedItem(proc_prep->unk_58);
+	SetPrepScreenMenuSelectedItem(proc_prep->status);
 	BG_EnableSyncByMask(0b11);
 }
+
+
+
+
+
+
+// On End
+void EndPrepScreen(){
+	
+	for( int i = 1; i < FACTION_GREEN; i++ )
+	{
+		struct Unit* unit = GetUnit(i);
+		
+		if( !UNIT_IS_VALID(unit) )
+			continue;
+		
+		unit->state = unit->state &~ (US_UNSELECTABLE);
+		
+		// here are Some Useless BWL operations
+		
+	} // for unit index
+	
+	ShrinkPlayerUnitList();
+	Proc_EndEach(gProc_PrepScreen);
+	
+	gGameState.gameStateBits &= 0b11101111;
+	gRAMChapterData.chapterStateBits &= 0b11101111;
+	gRAMChapterData.unk4A_1 = 1; // nextTutorialEventParams
+}
+
+
+
+
+
+// View Map: Label 9
+
+void PrepScreenMapMenu_OnViewMap(struct Proc_SALLYCURSOR* proc_prep){
+	
+	proc_prep->status = 1;
+	
+	Proc_Break(proc_prep);
+	
+	ClosePrepScreenMapMenu();
+	
+}
+
+
+// 8033978
+void _PrepScreenProc_MapIdle(struct Proc_SALLYCURSOR* proc_prep){
+	
+	return;
+	
+}
+
+
