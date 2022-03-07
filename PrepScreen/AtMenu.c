@@ -228,12 +228,23 @@ void AtMenu_InitPrepScreenMenu(struct Proc_AtMenu* proc) {
 	StartPrepScreenMenu(proc);
 	
 	// here neglect Arena case
-	SetPrepScreenMenuItem(0, PrepScreenMenu_OnPickUnits, TEXT_COLOR_NORMAL, 0x574, 0);
-	SetPrepScreenMenuItem(1, PrepScreenMenu_OnItems, TEXT_COLOR_NORMAL, 0x576, 0);
+	SetPrepScreenMenuItem(
+		PREP_MAINMENU_UNIT, 
+		PrepScreenMenu_OnPickUnits, 
+		TEXT_COLOR_NORMAL, 
+		0x574, 0);
+		
+	SetPrepScreenMenuItem(
+		PREP_MAINMENU_ITEM, 
+		PrepScreenMenu_OnItems, 
+		TEXT_COLOR_NORMAL, 
+		0x576, 0);
+		
 	AtMenu_AddPrepScreenSupportMenuItem(proc);
 	
 	SetPrepScreenMenuItem(
-		7, PrepScreenMenu_OnCheckMap,
+		PREP_MAINMENU_CHECKMAP, 
+		PrepScreenMenu_OnCheckMap,
 		0 == CanPrepScreenCheckMap()
 			? TEXT_COLOR_GRAY
 			: TEXT_COLOR_NORMAL,
@@ -242,7 +253,8 @@ void AtMenu_InitPrepScreenMenu(struct Proc_AtMenu* proc) {
 	);
 	
 	SetPrepScreenMenuItem(
-		2, PrepScreenMenu_OnSave,
+		PREP_MAINMENU_SAVE, 
+		PrepScreenMenu_OnSave,
 		0 == CanPrepScreenSave()
 			? TEXT_COLOR_GRAY
 			: TEXT_COLOR_NORMAL,
@@ -267,6 +279,7 @@ void AtMenu_AutoCapDeployPrepScreenUnits(struct Proc_AtMenu* proc){
 	proc->cur_counter = 0;
 	proc->unit_count = 0;
 	
+	// 函数GetChapterAllyUnitCount可以用于读取保存玩家设定的出战人数
 	for( int i = 0; i < GetChapterAllyUnitCount(); i++){
 		
 		struct Unit* unit = GetPrepScreenUnitListEntry(i);

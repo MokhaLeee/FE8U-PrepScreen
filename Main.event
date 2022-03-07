@@ -1,7 +1,7 @@
 
 
-// #define _DECOMP_
-#define HACK
+#define _DECOMP_
+// #define HACK
 
 #include "EAstdlib.event"
 #include "Extensions/Hack Installation.txt"

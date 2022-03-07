@@ -8,24 +8,34 @@
 #include "gbafe.h"
 // ====================================================
 
+enum{
+	
+	// menu_item of proc: (Proc_SALLYCURSOR + 0x58)
+	
+	PREP_MAPMENU_VIEWMAP = 1,
+	PREP_MAPMENU_FORMATION = 2,
+	PREP_MAPMENU_OPTION = 8,
+	PREP_MAPMENU_SAVE = 9,
+	
+	
+	
+	// menu item of proc: Proc_AtMenu
+	PREP_MAINMENU_UNIT = 0,
+	PREP_MAINMENU_ITEM = 1,
+	PREP_MAINMENU_SAVE = 2,
+	PREP_MAINMENU_SUPPORT = 4,
+	PREP_MAINMENU_CHECKMAP = 7,
+};
+
+
 struct Proc_SALLYCURSOR {
 	
 	/* 00 */ PROC_HEADER;
 	/* 29 */ u8 pad_29[0x58 - 0x29];
-	/* 58 */ u32 status;
+	/* 58 */ u32 menuCmd_index; // Prep-Menu cmd index!!!
 	/* 5C */
 };
 
-
-enum{
-	
-	// status of proc: Sally-Cursor (proc_prep + 0x58)
-	
-	STAT_PREPMAIN_NORMAL = 1,
-	STAT_PREPMAIN_VIEWMAP = 2,
-	
-	
-};
 
 struct Proc_AtMenu {
 	/* 00 */ PROC_HEADER;
@@ -42,7 +52,7 @@ struct Proc_AtMenu {
 	/* 33 */ u8 state;
 	/* 34 */ u8 unk_34;
 	/* 35 */ u8 unk_35;
-	/* 36 */ u8 end_prep;
+	/* 36 */ bool8 end_prep;
 	/* 38 */ u8 unk_38[0x3C - 0x38];
 	/* 3C */ u16 yDiff; // y Pos offset of Unit SMS
 	/* 3E */ u16 unk_3E; 
@@ -126,6 +136,7 @@ struct Unit* GetPrepScreenUnitListEntry(int num);
 void ReorderPlayerUnitsBasedOnDeployment();
 extern int GetPrepScreenUnitListSize();
 extern void ShrinkPlayerUnitList();
+// static int (*InitChapterDeployedUnitAndGetCount)(void) = (const void*) 0x8095971;
 
 // SallyCursor
 extern const struct ProcCmd gProc_PrepScreen[];
@@ -146,6 +157,8 @@ extern const struct ProcCmd gProc_PrepScreenMenuDummyItem[]; // 8A186DC
 
 void StartPrepScreenMenu(ProcPtr);
 extern void ClosePrepScreenMapMenu(void);
+void EnablePrepScreenMenu(void);
+int PrepScreenMenuExists(void);
 void EndPrepScreenMenu(void);
 void SetPrepScreenMenuItem(int index, void* effect_routine, int color, int msg, int msg_rtext); // 8097024
 

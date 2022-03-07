@@ -3,7 +3,7 @@
 
 extern void ResetPrepScreenHandCursor(ProcPtr);
 extern void sub_80AD4A0(int, int);
-extern void sub_80AD51C(int, int, int, int);
+static void(*PrepDrawHand)(int,int,int,int) = (const void*) 0x80AD51D;
 
 // =======================================================
 // =============== Proc Prep Main Menu ===================
@@ -73,9 +73,8 @@ void PrepScreenMenu_OnEnd(struct Proc_PrepMainMenu* proc) {
 
 
 void PrepScreenMenu_OnLoop_0(struct Proc_PrepMainMenu* proc) {
-	
-	// PrepScreenItemUseScreen_Init_ShowHand
-	sub_80AD51C(
+
+	PrepDrawHand(
 		(proc->xPos + 1) * 8 + 4,
 		(proc->yPos + 1) * 8 + proc->cur_index * 16,
 		6, 0x400);
@@ -102,7 +101,7 @@ void PrepScreenMenu_OnActiveLoop(struct Proc_PrepMainMenu* proc) {
 	hand_xPos = (proc->xPos + 1) * 8 + 4;
 	hand_yPos = (proc->yPos + 1) * 8 + proc->cur_index * 16;
 	
-	sub_80AD51C(hand_xPos, hand_yPos, 6, 0x400);
+	PrepDrawHand(hand_xPos, hand_yPos, 6, 0x400);
 	
 	cmd = proc->cmds[proc->cur_index];
 	
@@ -158,6 +157,7 @@ void PrepScreenMenu_OnActiveLoop(struct Proc_PrepMainMenu* proc) {
 			goto goto_on_failure;
 			
 		Proc_Goto(proc, 0);
+		
 		if( 0 == gRAMChapterData.unk41_8)
 			m4aSongNumStart(0x6B);
 		
@@ -242,7 +242,9 @@ goto_on_failure:
 
 
 
-// Misc
+// =======================================================
+// ====================== Misc ===========================
+// =======================================================
 
 
 void StartPrepScreenMenu(ProcPtr proc){
@@ -301,6 +303,28 @@ void SetPrepScreenMenuItem(int index, void *effect, int color, int msg, int msg_
 }
 
 
+void EnablePrepScreenMenu(void){
+	
+	struct Proc* proc;
+	
+	proc = Proc_Find(gProc_PrepScreenMenu);
+	
+	if( NULL != proc )
+		Proc_Goto(proc, 1);
+	
+}
+
+
+
+int PrepScreenMenuExists(void){
+	
+	if( NULL == Proc_Find(gProc_PrepScreenMenu) )
+		return 1;
+	
+	else
+		return 0;
+	
+}
 
 
 

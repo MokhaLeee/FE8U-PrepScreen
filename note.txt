@@ -13,3 +13,9 @@ PROC_CALL	(EnablePrepScreenMenu),
 PROC_REPEAT	(AtMenu_MaintainPrepScreenMenuHelp),
 
 通过这种方式实现事实上的阻塞的原因在于 Proc_PrepMainMenu 内部的主循环内，判定KeyPress的时候不同的生效函数是直接对应于 void (*effect)(ProcPtr parent)的，并且不同按键对应的效果函数都会调用函数Proc_Goto(parent, LABEL)，从而实现对AtMenu线程的条件跳转，从而直接跳出 PROC_REPEAT(AtMenu_MaintainPrepScreenMenuHelp)。
+
+
+
+<2>
+控制Prep-Screen Menu的手段非常奇怪。
+Menu的Proc内部有三个循环：Active Hand，Main Loop（Check Key state），Stuck Hand。然而Menu Proc并不会自行进入Main Loop，而是需要由parent proc（AtMenu or SallyCursor）在等待Fade out结束之后，调用函数: EnablePrepScreenMenu (8097394)，强行进入Main Loop

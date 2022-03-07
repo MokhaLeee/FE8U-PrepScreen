@@ -160,8 +160,10 @@ void ProcPrepUnit_Idle(struct Proc_PrepUnit* proc){
 	
 	proc->scroll_val = 4;
 	
+	// If L pressed, menu scrolls faster (well...)
 	if( L_BUTTON & gKeyStatusPtr->heldKeys )
 		proc->scroll_val = 8;
+	
 	
 	if( START_BUTTON & gKeyStatusPtr->newKeys )
 	{
