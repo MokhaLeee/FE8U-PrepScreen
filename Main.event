@@ -1,7 +1,7 @@
 
 
-#define _DECOMP_
-// #define HACK
+// #define _DECOMP_
+#define HACK
 
 #include "EAstdlib.event"
 #include "Extensions/Hack Installation.txt"
@@ -74,9 +74,13 @@ PUSH
 	ORG $09B438
 	LynJump(ProcPrepUnit_OnGameStart)
 	
+	
+	// SallyCursor
+	ORG $033F34
+	LynJump(PrepScreenProc_MapMovementLoop)
+	
 POP
 #endif // _DECOMP_
-
 
 
 
@@ -160,7 +164,6 @@ POP
 
 
 
-#include "Chapters/MokhaTest.event"
 
 
 
@@ -170,6 +173,11 @@ POP
 // ============= Debug =============
 // =================================
 
+
+{
+	#include Chapters/MokhaTest.event
+	#include Chapters/SF-Round-35.event
+}
 
 
 PUSH
