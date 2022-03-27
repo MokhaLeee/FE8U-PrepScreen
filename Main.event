@@ -1,7 +1,7 @@
 
 
-// #define _DECOMP_
-#define HACK
+#define _DECOMP_
+// #define HACK
 
 #include "EAstdlib.event"
 #include "Extensions/Hack Installation.txt"
@@ -74,6 +74,17 @@ PUSH
 	ORG $09B438
 	LynJump(ProcPrepUnit_OnGameStart)
 	
+	ORG $09A814
+	LynJump(PrepUnit_InitTexts)
+	PROTECT $09A814 $09A874
+	
+	ORG $09A874
+	LynJump(PrepUnit_InitGfx)
+	PROTECT $09A874 $09A8F8
+	
+	ORG $09A9F8
+	LynJump(PrepUnit_DrawUnitItems)
+	PROTECT $09A9F8 $09AAF0
 	
 	// SallyCursor
 	ORG $033F34

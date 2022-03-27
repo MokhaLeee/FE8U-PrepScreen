@@ -1,52 +1,76 @@
-# Prerequisites
-*.d
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+.cache
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+# Folder config file
+Desktop.ini
 
-# Linker output
-*.ilk
-*.map
-*.exp
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
+# Windows Installer files
 *.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+*.cab
+*.msi
+*.msm
+*.msp
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# Windows shortcuts
+*.lnk
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# rom stuff
+*.gba
+*.ups
+*.sav
+*.sgm
+*.ss1
+*.ss2
+*.ss3
+*.ss4
+*.ss5
+*.ss6
+*.ss7
+*.ss8
+*.ss9
+
+# python cache
+__pycache__
+Tools/EventAssembler*
+
+
+# =========================
+# Operating System Files
+# =========================
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+
+
+
+# c staff
+*.o

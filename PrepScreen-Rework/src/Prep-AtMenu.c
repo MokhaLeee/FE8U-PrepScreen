@@ -473,12 +473,4 @@ void StartNewPrepAtMenu(struct newProc_PrepMain* proc_prep){
 }
 
 
-// Misc
-int Event3E_PrepScreenCall(ProcPtr proc){
-	
-	HideAllUnits();
-	UnsetEventId(0x84);
-	Proc_StartBlocking(newProcCmd_PrepMain, proc);
-	return 2;
-}
 

@@ -14,7 +14,7 @@ extern void InitPrepScreenCursorPosition(void);
 static const u32 SetPrepScreenUnitListCharID = 0x80953C1;
 extern void PositionUnitsAccordingToDeployment();
 extern void PrepScreenProc_DimMapImmediate(ProcPtr);
-
+void HideAllUnits();
 
 enum{
 	

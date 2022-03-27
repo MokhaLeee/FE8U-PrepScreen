@@ -205,7 +205,7 @@ void AtMenu_Reinitialize(struct Proc_AtMenu* proc) {
 		gGenericBuffer, 0x1000 );
 	
 	
-	// chapter name
+	// chapter goal
 	sub_8095A44(0x5800, 0xB);
 	
 	sub_80AD1AC(proc);

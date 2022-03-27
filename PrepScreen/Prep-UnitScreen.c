@@ -20,13 +20,21 @@ static void (*PrepMenu_UpdateTsaScroll)(int) = (const void*) 0x809A645;
 // static void (*HandleMenuScroll)(int,int,int,int) = (const void*) 0x80976CD;
 
 // On Draw
-static void (*PrepUnit_InitTexts)(void) = (const void*) 0x809A815;
-static void (*PrepUnit_InitGfx)(void) = (const void*) 0x809A875;
+// static void (*PrepUnit_InitTexts)(void) = (const void*) 0x809A815;
+// static void (*PrepUnit_InitGfx)(void) = (const void*) 0x809A875;
 static void (*PrepUnit_InitSMS)(struct Proc_PrepUnit*) = (const void*) 0x809A8F9;
-static void (*PrepUnit_DrawLeftWindow)(struct Unit*) = (const void*) 0x809A9F9;
-static void (*PrepUnit_DrawLeftText)(struct Unit*) = (const void*) 0x809A931;
-static void (*PrepUnit_DrawTextInternal)(struct Proc_PrepUnit*, int) = (const void*) 0x809A581;
+// static void (*PrepUnit_DrawUnitItems)(struct Unit*) = (const void*) 0x809A9F9;
+static void (*PrepUnit_DrawLeftUnitName)(struct Unit*) = (const void*) 0x809A931;
+static void (*PrepUnit_DrawUnitListNames)(struct Proc_PrepUnit*, int) = (const void*) 0x809A581;
 static void (*PrepUnit_DrawText_Pick_Left)(struct Proc_PrepUnit*,int) = (const void*) 0x809AAF1;
+static void (*Prep_DrawChapterGoal)(int, int) = (const void*) 0x8095A45;
+
+void PrepUnit_InitTexts();
+void PrepUnit_InitGfx();
+void PrepUnit_DrawUnitItems(struct Unit*);
+
+
+
 
 
 // 809B40C
@@ -65,8 +73,7 @@ void ProcPrepUnit_OnInit(struct Proc_PrepUnit* proc){
 
 // 809AE7C
 void ProcPrepUnit_InitScreen(struct Proc_PrepUnit* proc){
-	
-	extern u16 gUnknown_08A181E8[];
+
 	extern void sub_809ADC8(struct Proc_PrepUnit*);
 	
 	extern void sub_809A874();
@@ -74,9 +81,16 @@ void ProcPrepUnit_InitScreen(struct Proc_PrepUnit* proc){
 	extern void sub_80976CC(int, int, u16, int);
 	extern void sub_80894E0();
 	
+	u16 BgConfig[12] = // gUnknown_08A181E8
+	{
+		// tile offset	map offset	screen size
+		0x0000,			0xE000,		0,			// BG 0
+		0x0000,			0xE800,		0,			// BG 1
+		0x0000,			0xF000,		0,			// BG 2
+		0x8000,			0xF800,		0,			// BG 3
+	};
 	
-	
-	SetupBackgrounds(gUnknown_08A181E8);
+	SetupBackgrounds(BgConfig);
 	
 	gLCDControlBuffer.dispcnt.bg0_on = 0;
 	gLCDControlBuffer.dispcnt.bg1_on = 0;
@@ -116,6 +130,7 @@ void ProcPrepUnit_InitScreen(struct Proc_PrepUnit* proc){
 	// <!> Also set SMS
 	Get6CDifferedLoop6C(sub_809A66C, proc);
 	
+	// Hand
 	ResetPrepScreenHandCursor(proc);
 	PrepScreen_DrawHandGfxMaybe(0x600, 0x1);
 	PrepDrawHand(
@@ -132,17 +147,130 @@ void ProcPrepUnit_InitScreen(struct Proc_PrepUnit* proc){
 	StartHelpPromptSprite(0x20, 0x8F, 9, (ProcPtr)proc);
 	
 	// Draw Texts
-	PrepUnit_DrawLeftWindow( GetPrepScreenUnitListEntry(proc->list_num_cur) );
-	PrepUnit_DrawLeftText( GetPrepScreenUnitListEntry(proc->list_num_cur) );
+	PrepUnit_DrawUnitItems( GetPrepScreenUnitListEntry(proc->list_num_cur) );
+	PrepUnit_DrawLeftUnitName( GetPrepScreenUnitListEntry(proc->list_num_cur) );
 	
 	for( int i = 0; i < 6; i++)
-		PrepUnit_DrawTextInternal(proc, proc->yDiff_cur / 16 + i);
+		PrepUnit_DrawUnitListNames(proc, proc->yDiff_cur / 16 + i);
 	
 	PrepUnit_DrawText_Pick_Left(proc, 0);
 	NewGreenTextColorManager((ProcPtr)proc);
 	LoadDialogueBoxGfx(BG_SCREEN_ADDR(0x29), 5);
 	RestartScreenMenuScrollingBg();
 }
+
+
+
+// On Draw
+
+// 0x809A815;
+void PrepUnit_InitTexts(){
+	
+	// gPrepUnitTexts = 2013598
+	
+	Font_InitForUIDefault();
+	
+	// 0x0 ~ 0xD: (total 14) unit name
+	for( int i = 0; i < 0xE; i++ )
+		Text_Init(&gPrepUnitTexts[i], 5);
+	
+	// 0xE ~ 0x12: (total 5) item name
+	for( int i = 0; i < 0x5; i++ )
+		Text_Init(&gPrepUnitTexts[i + 0xE], 7);
+	
+	Text_Init(&gPrepUnitTexts[0x13], 7);
+	Text_Init(&gPrepUnitTexts[0x14], 10);
+	Text_Init(&gPrepUnitTexts[0x15], 12);
+}
+
+
+
+// 0x809A874
+void PrepUnit_InitGfx(){
+	
+	extern void sub_80950E8(int, int);
+	extern u16 gUnknown_08A1B730[]; // gfx
+	extern u16 gUnknown_08A1B7C8[]; // tsa
+	extern u16 gUnknown_08A1D510[]; // gGfx_PrepButton
+	// extern u16 gUnknown_08A1D79C[]; // pal
+	
+	ResetIconGraphics_();
+	LoadUiFrameGraphics();
+	LoadObjUIGfx();
+	
+	LoadIconPalettes(4); // item icon
+	
+	Prep_DrawChapterGoal(0x6000, 8);
+	sub_80950E8(0x6000, 0xF);
+	
+	CopyDataWithPossibleUncomp(gUnknown_08A1B730, (void*)0x06000440);
+	CopyDataWithPossibleUncomp(gUnknown_08A1B7C8, gGenericBuffer);
+	CallARM_FillTileRect(gBG1TilemapBuffer, gGenericBuffer, 0x1000);
+	
+	CopyDataWithPossibleUncomp(gUnknown_08A1D510, (void*)0x6010800);
+	CopyToPaletteBuffer(gUnknown_08A1D79C, 0x320, 0x20);
+	EnablePaletteSync();
+}
+
+
+// 0x809A9F9
+void PrepUnit_DrawUnitItems(struct Unit* unit){
+	
+	int item_count, item;
+	
+	ResetIconGraphics_();
+	
+	// 清空原有的道具列表
+	TileMap_FillRect(
+		TILEMAP_LOCATED( gBG0TilemapBuffer, 1, 5),
+		0xB, 0xA, 0);
+		
+	item_count = GetUnitItemCount(unit);
+	
+	if( item_count < 1 )
+		goto goto_return;
+	
+	for( int i = 0; i < item_count; i++ )
+	{
+		item = unit->items[i];
+		
+		DrawIcon(
+			TILEMAP_LOCATED( gBG0TilemapBuffer, 1, 5 + 2 * i),
+			GetItemIconId(item),
+			TILEREF(0, STATSCREEN_BGPAL_ITEMICONS) );
+		
+		Text_Clear( &gPrepUnitTexts[i + 0xE] );
+		
+		DrawTextInline(
+			&gPrepUnitTexts[i + 0xE],
+			TILEMAP_LOCATED( gBG0TilemapBuffer, 3, 5 + 2 * i),
+			IsItemDisplayUsable(unit, item)
+				? TEXT_COLOR_NORMAL
+				: TEXT_COLOR_GRAY,
+			0, 0, GetItemName(item) );
+		
+		DrawDecNumber(
+			TILEMAP_LOCATED( gBG0TilemapBuffer, 11, 5 + 2 * i),
+			IsItemDisplayUsable(unit, item)
+				? TEXT_COLOR_BLUE
+				: TEXT_COLOR_GRAY,
+			GetItemUses(item) );
+		
+	} // for
+	
+	
+goto_return:
+	BG_EnableSyncByMask(0b01);
+	return;
+
+}
+
+
+
+
+
+
+
 
 
 // 0x809B038
@@ -236,7 +364,9 @@ void ProcPrepUnit_Idle(struct Proc_PrepUnit* proc){
 	if( proc->list_num_cur == proc->list_num_pre )
 		return;
 	
-	PrepUnit_DrawLeftWindow(GetPrepScreenUnitListEntry(proc->list_num_pre));
+	
+	// New Draw items
+	PrepUnit_DrawUnitItems(GetPrepScreenUnitListEntry(proc->list_num_cur));
 	
 	// Draw Left Text
 	sub_80ACE20(sub_809A9E8, 1, proc);
@@ -258,10 +388,10 @@ void ProcPrepUnit_Idle(struct Proc_PrepUnit* proc){
 	else
 	{
 		if( proc->list_num_cur < proc->list_num_pre )
-			PrepUnit_DrawTextInternal(proc, proc->yDiff_cur / 16 - 1);
+			PrepUnit_DrawUnitListNames(proc, proc->yDiff_cur / 16 - 1);
 		
 		if( proc->list_num_cur > proc->list_num_pre )
-			PrepUnit_DrawTextInternal(proc, proc->yDiff_cur / 16 + 6);
+			PrepUnit_DrawUnitListNames(proc, proc->yDiff_cur / 16 + 6);
 		
 		sub_80AD4E4( (proc->list_num_pre % 2) * 56 + 0x70 );
 	}
@@ -308,4 +438,28 @@ void ProcPrepUnit_OnGameStart(struct Proc_PrepUnit* proc){
 	
 	proc->unk_37 = 1;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
