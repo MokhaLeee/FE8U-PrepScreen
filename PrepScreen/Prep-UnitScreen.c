@@ -27,13 +27,13 @@ static void (*PrepUnit_InitSMS)(struct Proc_PrepUnit*) = (const void*) 0x809A8F9
 static void (*PrepUnit_DrawLeftUnitName)(struct Unit*) = (const void*) 0x809A931;
 static void (*PrepUnit_DrawUnitListNames)(struct Proc_PrepUnit*, int) = (const void*) 0x809A581;
 static void (*PrepUnit_DrawText_Pick_Left)(struct Proc_PrepUnit*,int) = (const void*) 0x809AAF1;
-static void (*Prep_DrawChapterGoal)(int, int) = (const void*) 0x8095A45;
+// static void (*Prep_DrawChapterGoal)(int, int) = (const void*) 0x8095A45;
 
 void PrepUnit_InitTexts();
 void PrepUnit_InitGfx();
 void PrepUnit_DrawUnitItems(struct Unit*);
-
-
+void Prep_DrawChapterGoal(int VRAM_offset, int index);
+void PrepUnit_DrawSMSsAndObjs(struct Proc_PrepUnit*);
 
 
 
@@ -67,7 +67,7 @@ void ProcPrepUnit_OnInit(struct Proc_PrepUnit* proc){
 	proc->cur_counter = parent->cur_counter;
 	proc->yDiff_cur = parent->yDiff;
  	proc->list_num_pre = proc->list_num_cur;
-	proc->unk_37 = 0;
+	proc->button_blank = 0;
 }
 
 
@@ -77,7 +77,7 @@ void ProcPrepUnit_InitScreen(struct Proc_PrepUnit* proc){
 	extern void sub_809ADC8(struct Proc_PrepUnit*);
 	
 	extern void sub_809A874();
-	extern void sub_809A66C(struct Proc_PrepUnit*);
+	// extern void sub_809A66C(struct Proc_PrepUnit*);
 	extern void sub_80976CC(int, int, u16, int);
 	extern void sub_80894E0();
 	
@@ -128,7 +128,7 @@ void ProcPrepUnit_InitScreen(struct Proc_PrepUnit* proc){
 	PrepUnit_InitSMS(proc);
 	
 	// <!> Also set SMS
-	Get6CDifferedLoop6C(sub_809A66C, proc);
+	Get6CDifferedLoop6C(PrepUnit_DrawSMSsAndObjs, proc);
 	
 	// Hand
 	ResetPrepScreenHandCursor(proc);
@@ -188,11 +188,10 @@ void PrepUnit_InitTexts(){
 // 0x809A874
 void PrepUnit_InitGfx(){
 	
-	extern void sub_80950E8(int, int);
+	static void (*DrawPrepWindowGfx2)(int, int)= (const void*) 0x80950E9;
 	extern u16 gUnknown_08A1B730[]; // gfx
 	extern u16 gUnknown_08A1B7C8[]; // tsa
 	extern u16 gUnknown_08A1D510[]; // gGfx_PrepButton
-	// extern u16 gUnknown_08A1D79C[]; // pal
 	
 	ResetIconGraphics_();
 	LoadUiFrameGraphics();
@@ -201,7 +200,7 @@ void PrepUnit_InitGfx(){
 	LoadIconPalettes(4); // item icon
 	
 	Prep_DrawChapterGoal(0x6000, 8);
-	sub_80950E8(0x6000, 0xF);
+	DrawPrepWindowGfx2(0x6000, 0xF);
 	
 	CopyDataWithPossibleUncomp(gUnknown_08A1B730, (void*)0x06000440);
 	CopyDataWithPossibleUncomp(gUnknown_08A1B7C8, gGenericBuffer);
@@ -264,6 +263,135 @@ goto_return:
 	return;
 
 }
+
+
+
+// 8095A44
+void Prep_DrawChapterGoal(int VRAM_offset, int pal_index){
+	
+	extern u16 gPal_UIFont[]; // gUnknown_0859EF00
+	
+	struct Font tempFont;
+	struct TextHandle tempTextHandle;
+	int msg;
+	char* string;
+	
+	InitSomeOtherGraphicsRelatedStruct(&tempFont, OBJ_VRAM0 + VRAM_offset, pal_index); // Font_InitForObj
+	CopyToPaletteBuffer(gPal_UIFont, (0x10 + pal_index) * 32, 0x20);
+	
+	Text_Init3( &tempTextHandle );
+	SetFont( &tempFont );
+	SetFontGlyphSet(0);
+	
+	Text_80046B4( &tempTextHandle, 0); // Text_Fill2DLine
+	
+	if( 2 == GetChapterThing() )
+		msg = 0x19E;
+	else
+		msg = GetROMChapterStruct(gRAMChapterData.chapterIndex)->goalWindowTextId;
+	
+	string = GetStringFromIndex(msg);
+	
+	Text_InsertString(
+		&tempTextHandle,
+		GetStringTextCenteredPos(0x60, string),
+		0, string);
+	
+	SetFont(0);
+}
+
+
+
+
+// 809A66C
+void PrepUnit_DrawSMSsAndObjs(struct Proc_PrepUnit* proc){
+	
+	static void (*DrawUnitSMS)(int root_node, int xPos, int yPos, struct Unit* unit) = (const void*) 0x8027B61;
+	extern const u16 gUnknown_08A18E34[]; // gfx
+	extern const u16 gUnknown_08A18E4E[]; // gfx
+	
+	for( int i = 0; i < GetPrepScreenUnitListSize(); i++ )
+	{
+		int yoff = (i >> 1) << 4;
+		yoff -= proc->yDiff_cur;
+		
+		if( yoff < 0 )
+			continue;
+		
+		if( (yoff + 0xF) > 0x5F )
+			continue;
+		
+		DrawUnitSMS(
+			0, 
+			(i & 1)* 56 + 0x70,
+			yoff + 0x18,
+			GetPrepScreenUnitListEntry(i) );
+		
+	} // for
+	
+	if( 0 == (proc->yDiff_cur & 0xF) )
+	{
+		gLCDControlBuffer.dispcnt.win0_on = 0;
+		gLCDControlBuffer.dispcnt.win1_on = 0;
+		gLCDControlBuffer.dispcnt.objWin_on = 0;
+	}
+	else
+	{
+		
+		gLCDControlBuffer.dispcnt.win0_on = 1;
+		gLCDControlBuffer.dispcnt.win1_on = 1;
+		gLCDControlBuffer.dispcnt.objWin_on = 1;
+		
+		gLCDControlBuffer.win0_left = 0;
+		gLCDControlBuffer.win0_top = 0;
+		gLCDControlBuffer.win0_right = 0xF0;
+		gLCDControlBuffer.win0_bottom = 0x1A;
+		
+		gLCDControlBuffer.win1_left = 0;
+		gLCDControlBuffer.win1_top = 0x78;
+		gLCDControlBuffer.win1_right = 0xF0;
+		gLCDControlBuffer.win1_bottom = 0xA0;
+		
+		gLCDControlBuffer.wincnt.win0_enableBg0 = 1;
+		gLCDControlBuffer.wincnt.win0_enableBg1 = 1;
+		gLCDControlBuffer.wincnt.win0_enableBg2 = 0;
+		gLCDControlBuffer.wincnt.win0_enableBg3 = 1;
+		gLCDControlBuffer.wincnt.win0_enableObj = 0;
+		
+		gLCDControlBuffer.wincnt.win1_enableBg0 = 1;
+		gLCDControlBuffer.wincnt.win1_enableBg1 = 1;
+		gLCDControlBuffer.wincnt.win1_enableBg2 = 0;
+		gLCDControlBuffer.wincnt.win1_enableBg3 = 1;
+		gLCDControlBuffer.wincnt.win1_enableObj = 1;
+		
+		gLCDControlBuffer.wincnt.wout_enableBg0 = 1;
+		gLCDControlBuffer.wincnt.wout_enableBg1 = 1;
+		gLCDControlBuffer.wincnt.wout_enableBg2 = 1;
+		gLCDControlBuffer.wincnt.wout_enableBg3 = 1;
+		gLCDControlBuffer.wincnt.wout_enableObj = 1;
+		
+	}
+	
+	if( proc->button_blank != 0 )
+		proc->button_blank++;
+	
+	
+	// Insert Chapter goal text
+	for( int i = 0; i < 3; i++ )
+		PutSpriteExt(4, 4 + i * 0x20, 0x81, gObject_32x16, 0x8700+ 4 * i);
+	
+	
+	// "Start" button and control blank
+	if( (0 == (proc->button_blank & 0b100)) && (0 != proc->cur_counter) )
+		PutSpriteExt(4, 0x80, 0x82, gUnknown_08A18E4E, 0x40);
+	
+	// "Select" button
+	PutSpriteExt(4, 0x80, 0x8F, gUnknown_08A18E34, 0x40);
+	
+	SMS_FlushDirect();
+}
+
+
 
 
 
@@ -350,7 +478,7 @@ void ProcPrepUnit_Idle(struct Proc_PrepUnit* proc){
 	
 	if( DPAD_RIGHT & key_pre )
 		if( 0 == (1 & proc->list_num_cur) )
-			if( proc->list_num_cur < GetPrepScreenUnitListSize() )
+			if( (proc->list_num_cur + 1) < GetPrepScreenUnitListSize() )
 				proc->list_num_cur++;
 			
 	if( DPAD_UP & key_pre )
@@ -436,7 +564,7 @@ void ProcPrepUnit_OnGameStart(struct Proc_PrepUnit* proc){
 	// Here goto AtMenu's label !!
 	Proc_Goto(parent, 0x6); // AtMenu label 6: end
 	
-	proc->unk_37 = 1;
+	proc->button_blank = 1;
 }
 
 
