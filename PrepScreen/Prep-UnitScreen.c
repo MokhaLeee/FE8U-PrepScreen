@@ -18,6 +18,7 @@ static void (*PrepStartScroll)(ProcPtr, int, int, int, int) = (const void*) 0x80
 extern void RestartScreenMenuScrollingBg();
 static void (*PrepMenu_UpdateTsaScroll)(int) = (const void*) 0x809A645;
 // static void (*HandleMenuScroll)(int,int,int,int) = (const void*) 0x80976CD;
+int ShouldPrepUnitMenuScroll(struct Proc_PrepUnit* proc);
 
 // On Draw
 // static void (*PrepUnit_InitTexts)(void) = (const void*) 0x809A815;
@@ -25,7 +26,7 @@ static void (*PrepMenu_UpdateTsaScroll)(int) = (const void*) 0x809A645;
 static void (*PrepUnit_InitSMS)(struct Proc_PrepUnit*) = (const void*) 0x809A8F9;
 // static void (*PrepUnit_DrawUnitItems)(struct Unit*) = (const void*) 0x809A9F9;
 static void (*PrepUnit_DrawLeftUnitName)(struct Unit*) = (const void*) 0x809A931;
-static void (*PrepUnit_DrawUnitListNames)(struct Proc_PrepUnit*, int) = (const void*) 0x809A581;
+// static void (*PrepUnit_DrawUnitListNames)(struct Proc_PrepUnit*, int) = (const void*) 0x809A581;
 static void (*PrepUnit_DrawText_Pick_Left)(struct Proc_PrepUnit*,int) = (const void*) 0x809AAF1;
 // static void (*Prep_DrawChapterGoal)(int, int) = (const void*) 0x8095A45;
 
@@ -34,7 +35,7 @@ void PrepUnit_InitGfx();
 void PrepUnit_DrawUnitItems(struct Unit*);
 void Prep_DrawChapterGoal(int VRAM_offset, int index);
 void PrepUnit_DrawSMSsAndObjs(struct Proc_PrepUnit*);
-
+void PrepUnit_DrawUnitListNames(struct Proc_PrepUnit*, int line);
 
 
 // 809B40C
@@ -124,10 +125,8 @@ void ProcPrepUnit_InitScreen(struct Proc_PrepUnit* proc){
 	BG_EnableSyncByMask(0b1111);
 	SetDefaultColorEffects();
 	
-	// <!> Init SMS
+	// SMS
 	PrepUnit_InitSMS(proc);
-	
-	// <!> Also set SMS
 	Get6CDifferedLoop6C(PrepUnit_DrawSMSsAndObjs, proc);
 	
 	// Hand
@@ -151,7 +150,7 @@ void ProcPrepUnit_InitScreen(struct Proc_PrepUnit* proc){
 	PrepUnit_DrawLeftUnitName( GetPrepScreenUnitListEntry(proc->list_num_cur) );
 	
 	for( int i = 0; i < 6; i++)
-		PrepUnit_DrawUnitListNames(proc, proc->yDiff_cur / 16 + i);
+		PrepUnit_DrawUnitListNames(proc, proc->yDiff_cur / 0x10 + i);
 	
 	PrepUnit_DrawText_Pick_Left(proc, 0);
 	NewGreenTextColorManager((ProcPtr)proc);
@@ -401,13 +400,17 @@ void PrepUnit_DrawSMSsAndObjs(struct Proc_PrepUnit* proc){
 
 
 
+
+
+
+
+
 // 0x809B038
 void ProcPrepUnit_Idle(struct Proc_PrepUnit* proc){
 	
 	extern int sub_809ACB4(struct Proc_PrepUnit* proc);
 	extern void sub_809A9E8(struct Proc_PrepUnit*);
 	extern void sub_80ACE20(void*, int, ProcPtr);
-	extern int sub_809AD90(struct Proc_PrepUnit*);
 	extern void sub_809AE10(struct Proc_PrepUnit*);
 	
 	const u16 key_pre = gKeyStatusPtr->repeatedKeys;
@@ -503,7 +506,7 @@ void ProcPrepUnit_Idle(struct Proc_PrepUnit* proc){
 		m4aSongNumStart(0x65);
 	
 	// 
-	if( 0 == sub_809AD90(proc) )
+	if( 0 == ShouldPrepUnitMenuScroll(proc) )
 	{
 		proc->list_num_pre = proc->list_num_cur;
 		
@@ -577,12 +580,97 @@ void ProcPrepUnit_OnGameStart(struct Proc_PrepUnit* proc){
 
 
 
+// Menu Scroll
+
+// 0x809AD91
+int ShouldPrepUnitMenuScroll(struct Proc_PrepUnit* proc){
+	
+	/*
+	yDiff_cur / 0x10	-> 	当前列表最上层的line
+	list_num_cur 		->	鼠标指代的当前列表序号
+	*/
+	
+	
+	int line = proc->yDiff_cur / 0x10;
+	int handLine = proc->list_num_cur / 2;
+	int maxLine = GetPrepScreenUnitListSize() / 2;
+	
+	// Judge up
+	// 1. handLine 位于 line 之上
+	// 2. line 并非 line 0
+	if( handLine < line )
+		if( line > 0 )
+			return 1;
+
+	// Judge down
+	// 1. handLine已经达到line+5
+	// 2. handLine 并非最后一行
+	if( handLine > (line + 4) )
+		if( handLine < maxLine )
+			return 1;
+	
+	return 0;
+
+	
+	
+}
 
 
 
 
 
-
+// 0x809A581
+void PrepUnit_DrawUnitListNames(struct Proc_PrepUnit* proc, int line){
+	
+	extern int IsCharacterForceDeployed(int char_id);
+	
+	int list_index, text_index, color, newLine;
+	struct Unit* unit;
+	
+	// it use 14 TextHandle to store 6 line of 12 Units;
+	// then put them on BG2
+	// then handle the bg-offset!
+	
+	// newLine = line % 7;
+	
+	newLine = line;
+	
+	while(newLine > 6)
+		newLine = newLine - 7;
+	
+	
+	// just add 2 units' name
+	for( int i = 0; i < 2; i++ )
+	{
+		text_index = newLine * 2 + i;
+		list_index = line * 2 + i;
+		
+		if( list_index >= GetPrepScreenUnitListSize() )
+			continue;
+		
+		unit = GetPrepScreenUnitListEntry(list_index);
+		
+		// color
+		if( IsCharacterForceDeployed(unit->pCharacterData->number) )
+			color = TEXT_COLOR_GREEN;
+		else if (unit->state & US_NOT_DEPLOYED)
+			color = TEXT_COLOR_GRAY;
+		else
+			color = TEXT_COLOR_NORMAL;
+		
+		Text_Clear( &gPrepUnitTexts[text_index] );
+		
+		DrawTextInline(
+			&gPrepUnitTexts[text_index],
+			TILEMAP_LOCATED( gBG2TilemapBuffer, 0x10 + i * 7 , line * 2 ),
+			color,
+			0, 0,
+			GetStringFromIndex(unit->pCharacterData->nameTextId) );
+		
+	} // for
+	
+	BG_EnableSyncByMask(0b100);
+}
 
 
 

@@ -90,6 +90,15 @@ PUSH
 	LynJump(Prep_DrawChapterGoal)
 	PROTECT $095A44 $095AD6
 	
+	ORG $09AD90
+	// LynJump(ShouldPrepUnitMenuScroll)
+	PROTECT $09AD90 $09ADC4
+	
+	ORG $09A580
+	LynJump(PrepUnit_DrawUnitListNames)
+	PROTECT $09A580 $09A644
+	
+	
 	// SMS
 	ORG $09A66C
 	LynJump(PrepUnit_DrawSMSsAndObjs)
